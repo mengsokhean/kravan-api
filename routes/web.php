@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Artisan;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,10 @@ Route::get('/create-admin', function () {
     $user = User::create([
         'name' => 'Admin Kravan',
         'email' => 'lionelheng799@gmail.com',
-        'password' => Hash::make('thyseng1333'), // បងអាចដូរ password ត្រង់នេះបាន
+        'password' => Hash::make('password123'), // បងអាចដូរ password ត្រង់នេះបាន
     ]);
     return "Admin User created successfully! You can now login.";
+});
+Route::get('/', function () {
+    return view('welcome');
 });
