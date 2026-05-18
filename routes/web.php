@@ -29,3 +29,17 @@ Route::get('/create-admin', function () {
 Route::get('/', function () {
     return view('welcome');
 });
+// Route សម្រាប់ទាញយក Error Log មកបង្ហាញលើអេក្រង់
+Route::get('/view-log', function () {
+    $logPath = storage_path('logs/laravel.log');
+    
+    if (!file_exists($logPath)) {
+        return "Log file does not exist yet.";
+    }
+
+    $file = file($logPath);
+    // ចាប់យកអក្សរ ៥០ ជួរចុងក្រោយបង្អស់
+    $lastLines = array_slice($file, -50); 
+    
+    echo "<pre>" . implode("", $lastLines) . "</pre>";
+});
