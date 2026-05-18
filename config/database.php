@@ -61,29 +61,10 @@ return [
             'engine'         => null,
 
             // ===== SSL FIX សម្រាប់ Aiven MySQL =====
-            'options' => (function () {
-                $sslCa   = env('MYSQL_ATTR_SSL_CA');
-                $options = [];
-
-                if (extension_loaded('pdo_mysql')) {
-                    // ១. ជំរើស​ទី ១: ប្រើ​ custom CA file (Aiven CA)
-                    if ($sslCa && file_exists($sslCa)) {
-                        $options[PDO::MYSQL_ATTR_SSL_CA]     = $sslCa;
-                        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
-
-                        // ២. ជំរើស​ទី ២: Fallback — ប្រើ system CA bundle
-                    } elseif (file_exists('/etc/ssl/certs/ca-certificates.crt')) {
-                        $options[PDO::MYSQL_ATTR_SSL_CA]     = '/etc/ssl/certs/ca-certificates.crt';
-                        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
-
-                        // ៣. ជំរើស​ទី ៣: Force SSL ដោយ​គ្មាន​ CA verify (last resort)
-                    } else {
-                        $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = false;
-                    }
-                }
-
-                return $options;
-            })(),
+            'options' => extension_loaded('pdo_mysql') ? [
+                PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA', '/etc/ssl/certs/ca-certificates.crt'),
+                PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => false,
+            ] : [],
             // ===== END SSL FIX =====
         ],
 
