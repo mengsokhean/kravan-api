@@ -1,21 +1,25 @@
 FROM php:8.2-apache
 
+# Install dependencies
 RUN apt-get update && apt-get install -y \
-    libpng-dev libjpeg-dev libfreetype6-dev zip unzip git \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install gd pdo pdo_mysql
+    curl zip unzip git libpng-dev libonig-dev \
+    libxml2-dev libzip-dev \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath gd
 
-RUN a2enmod rewrite
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- \
+    --install-dir=/usr/local/bin --filename=composer
+
 WORKDIR /var/www/html
+
 COPY . .
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 RUN composer install --no-dev --optimize-autoloader
 
-RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cache
+RUN php artisan config:cache && \
+    php artisan route:cache && \
+    php artisan view:cache
 
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/000-default.conf
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf
-EXPOSE 80
-CMD ["apache2-foreground"]
+EXPOSE $PORT
+
+CMD php artisan serve --host=0.0.0.0 --port=$PORT

@@ -13,12 +13,18 @@ Route::get('/run-migrate', function () {
 
 // Route សម្រាប់បង្កើត User ថ្មីដើម្បី Login (Seed User)
 Route::get('/create-admin', function () {
-    $user = User::create([
+    // ពិនិត្យមើលបើមាន Email នេះហើយ វានឹងមិនបង្កើតជាន់គ្នាទេ
+    $userExists = User::where('email', 'lionelheng799@gmail.com')->exists();
+    if ($userExists) {
+        return "Admin user already exists in the database!";
+    }
+
+    User::create([
         'name' => 'Admin Kravan',
         'email' => 'lionelheng799@gmail.com',
-        'password' => Hash::make('password123'), // បងអាចដូរ password ត្រង់នេះបាន
+        'password' => Hash::make('kravan2026'), // បងអាចប្តូរលេខសម្ងាត់ត្រង់នេះបាន
     ]);
-    return "Admin User created successfully! You can now login.";
+    return "Admin User created successfully! Username: lionelheng799@gmail.com | Password: kravan2026";
 });
 Route::get('/', function () {
     return view('welcome');
