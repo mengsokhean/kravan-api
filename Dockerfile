@@ -1,44 +1,30 @@
 FROM php:8.2-apache
 
-# Install system dependencies + PHP extensions
 RUN apt-get update && apt-get install -y \
-    libzip-dev \
-    libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
-    libssl-dev \
+    libzip-dev libpng-dev libjpeg-dev libfreetype6-dev libssl-dev \
     zip unzip curl git \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install \
-        pdo \
-        pdo_mysql \
-        zip \
-        bcmath \
-        gd \
-        exif \
-        pcntl \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && docker-php-ext-install pdo pdo_mysql zip bcmath gd exif pcntl \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
 WORKDIR /var/www/html
 
-# Copy project files
 COPY . .
 
-# Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+RUN mkdir -p bootstrap/cache \
+    && mkdir -p storage/framework/sessions \
+    && mkdir -p storage/framework/views \
+    && mkdir -p storage/framework/cache \
+    && chmod -R 777 bootstrap/cache \
+    && chmod -R 777 storage
 
-# Fix permissions
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --ignore-platform-reqs
+
 RUN chown -R www-data:www-data /var/www/html/storage \
-    && chown -R www-data:www-data /var/www/html/bootstrap/cache \
-    && chmod -R 775 /var/www/html/storage \
-    && chmod -R 775 /var/www/html/bootstrap/cache
+    && chown -R www-data:www-data /var/www/html/bootstrap/cache
 
-# Configure Apache
 RUN echo '<VirtualHost *:80>\n\
     DocumentRoot /var/www/html/public\n\
     <Directory /var/www/html/public>\n\
