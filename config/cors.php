@@ -13,11 +13,10 @@ return [
     'allowed_methods' => ['*'],
 
     'allowed_origins' => [
-        'https://kravan-pictures.vercel.app',
         'https://kravanpictures.com',
-        'https://www.kravanpictures.com',
+        'https://kravan-pictures.vercel.app',
+        'http://localhost:5173',
         'http://localhost:3000',
-        'http://localhost:5173', // Vite default port
     ],
 
     'allowed_origins_patterns' => [],
